@@ -4,18 +4,21 @@ import { castRay, nearestIndex, onTrack } from './track.js'
 
 export const SIZES = [8, 10, 2]
 export const DT = 1 / 60
-export const GEN_TIME = 40
+// A generation is a race: it ends once every car has finished or crashed.
+export const RACE_LAPS = 2
+const SAFETY_TIME = 120
 export const RAY_LEN = 200
 export const RAYS = [-90, -50, -20, 0, 20, 50, 90].map(d => d * Math.PI / 180)
 export const MAX_SPEED = 340
-const ACCEL = 260, BRAKE = 420, TURN = 3.2, DRAG = 0.4, STALL = 2
+// Every 2 s a car must have gained 27 samples (about 80 px/s) or it is retired.
+const ACCEL = 260, BRAKE = 420, TURN = 3.2, DRAG = 0.4, PACE_WINDOW = 2, PACE_MIN = 27
 
 export function makeCar(track, genome = null, hue = 0) {
   const s = track.start
   return {
     x: s.x, y: s.y, angle: s.angle, speed: 0, steer: 0,
-    alive: true, genome, hue,
-    idx: 0, total: 0, best: 0, stall: 0,
+    alive: true, finished: 0, genome, hue,
+    idx: 0, total: 0, best: 0, mark: 0, markAt: 0,
     laps: 0, lapStart: 0, lastLap: 0, bestLap: Infinity,
     sensors: new Float32Array(RAYS.length),
     acts: makeActs(SIZES),
@@ -51,7 +54,7 @@ export function drive(car, track, steer, throttle, clock) {
   else if (d < -n / 2) d += n
   car.idx = idx
   car.total += d
-  if (car.total > car.best) { car.best = car.total; car.stall = 0 } else car.stall += DT
+  if (car.total > car.best) car.best = car.total
 
   const laps = Math.floor(car.best / n)
   if (laps > car.laps) {
@@ -91,6 +94,7 @@ export class Race {
     this.t = 0
     this.cars = this.genomes.map((g, i) => makeCar(this.track, g, this.hues[i]))
     this.alive = this.cars.length
+    this.finished = 0
   }
 
   step(events = []) {
@@ -106,7 +110,7 @@ export class Race {
       if (ev === 'crash') {
         this.alive--
         events.push({ type: 'crash', x: car.x, y: car.y, hue: car.hue, speed: car.speed })
-      } else if (car.stall > STALL || car.total < -20) {
+      } else if (car.total < -20 || this.tooSlow(car)) {
         car.alive = false
         this.alive--
       } else if (ev === 'lap') {
@@ -114,17 +118,35 @@ export class Race {
           this.bestLap = car.lastLap
           events.push({ type: 'record', time: car.lastLap, hue: car.hue })
         }
+        // Past the flag the car parks on the line and waits for the rest.
+        if (car.laps >= RACE_LAPS) {
+          car.alive = false
+          car.finished = this.t
+          car.speed = 0
+          this.alive--
+          this.finished++
+        }
       }
     }
-    if (this.alive === 0 || this.t >= GEN_TIME) this.evolve(events)
+    if (this.alive === 0 || this.t >= SAFETY_TIME) this.evolve(events)
     return events
+  }
+
+  tooSlow(car) {
+    if (this.t - car.markAt < PACE_WINDOW) return false
+    if (car.best - car.mark < PACE_MIN) return true
+    car.mark = car.best
+    car.markAt = this.t
+    return false
   }
 
   evolve(events = []) {
     const n = this.track.n
-    const fitness = this.cars.map(c => c.best)
-    const best = Math.max(...fitness)
-    const mean = fitness.reduce((a, b) => a + b, 0) / fitness.length
+    // Finishers also score for how quickly they took the flag.
+    const fitness = this.cars.map(c => c.best + (c.finished ? (SAFETY_TIME - c.finished) * 20 : 0))
+    const progress = this.cars.map(c => c.best)
+    const best = Math.max(...progress)
+    const mean = progress.reduce((a, b) => a + b, 0) / progress.length
     this.history.push({ gen: this.gen, best: best / n, mean: mean / n })
     const next = nextGeneration(this.genomes, this.hues, fitness, this.rand)
     this.genomes = next.genomes

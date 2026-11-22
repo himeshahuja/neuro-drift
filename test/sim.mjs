@@ -50,3 +50,17 @@ console.log(race.history.map(h => h.best.toFixed(2)).join(' '))
 assert.ok(record < Infinity, 'no car completed a lap in 30 generations')
 
 console.log('ok')
+
+// A generation only ends when nobody is still racing.
+{
+  const r = new Race(buildTrack(randomTrack(W, H, mulberry32(3)), W, H), { rand: mulberry32(2), pop: 40 })
+  for (let gen = r.gen; r.gen < 15;) {
+    const t = r.t
+    r.step()
+    if (r.gen !== gen) {
+      assert.ok(t < 119, `generation ${gen} was cut off by the clock`)
+      gen = r.gen
+    }
+  }
+}
+console.log('ok: generations wait for every car')

@@ -1,6 +1,6 @@
 import './style.css'
 import { buildTrack, pathLength, randomTrack, resample, toggleCone } from './track.js'
-import { DT, Race, SIZES, drive, makeCar } from './sim.js'
+import { DT, RACE_LAPS, Race, SIZES, drive, makeCar } from './sim.js'
 import { drawBrain, drawCars, drawChart, drawParticles, drawSkids, drawStroke, drawTrack } from './render.js'
 
 const $ = id => document.getElementById(id)
@@ -181,7 +181,8 @@ function frame(now) {
   setText('gen', String(race.gen))
   setText('alive', `${race.alive}/${race.cars.length}`)
   setText('lap', fmt(race.bestLap))
-  setText('laps', String(leader ? leader.laps : 0))
+  setText('done', String(race.finished))
+  setText('laps', leader ? `${Math.min(RACE_LAPS, leader.laps + 1)}/${RACE_LAPS}` : `${RACE_LAPS}/${RACE_LAPS}`)
   setText('you', fmt(playerBest))
   $('you-stat').hidden = !player
   requestAnimationFrame(frame)

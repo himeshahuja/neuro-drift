@@ -106,10 +106,10 @@ export function drawSkids(ctx, cars) {
 
 export function drawCars(ctx, race, leader, player) {
   for (const car of race.cars) {
-    if (!car.alive) carBody(ctx, car, 'rgba(90,90,90,0.35)')
+    if (!car.alive && !car.finished) carBody(ctx, car, 'rgba(90,90,90,0.35)')
   }
   for (const car of race.cars) {
-    if (car.alive && car !== leader) carBody(ctx, car, `hsl(${car.hue} 85% 58%)`)
+    if ((car.alive || car.finished) && car !== leader) carBody(ctx, car, `hsl(${car.hue} 85% 58%)`)
   }
   if (leader) {
     ctx.lineWidth = 1

@@ -15,7 +15,8 @@ Live: https://himeshahuja.github.io/neuro-drift/
 
 - **Sensors.** Each car casts 7 rays (−90° to +90°) against a 4 px on-track bitmap. With its speed, that makes 8 inputs.
 - **Brain.** An 8 → 10 → 2 tanh network outputs steering and throttle. Grip falls with speed, so the fast cars have to learn to brake for corners.
-- **Fitness.** Progress is measured along the track's centre line, searched near the car's last position so self-crossing tracks still work. A car dies if it hits a wall or a cone, makes no new progress for 2 s, or drives backwards.
+- **Fitness.** Progress is measured along the track's centre line, searched near the car's last position so self-crossing tracks still work. A car dies if it hits a wall or a cone, falls below about 80 px/s over any 2 s, or drives backwards.
+- **Races.** Each generation is a 2-lap race. A car that takes the flag parks on the line, and the next generation starts only when every car has finished or crashed. Finishers also score for how quickly they finished.
 - **Evolution.** The top 6 survive unchanged. The rest are bred from 3-way tournament picks, with uniform crossover and Gaussian mutation on 8% of genes. Paint is inherited from the fitter parent, so you can watch one bloodline's colour take over the grid.
 - **Tracks.** Random tracks are circles bent by sine harmonics, so they never cross themselves. Drawn tracks are smoothed with Chaikin's algorithm and resampled every 6 px.
 
