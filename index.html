@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Neuro Drift</title>
+  <meta name="description" content="120 cars with tiny neural networks learn to race by evolution. Draw your own circuit, drop cones, and race the champion." />
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <canvas id="world" aria-label="Race track"></canvas>
+
+  <header class="hud">
+    <p class="brand">Neuro Drift</p>
+    <p class="gen-label">Generation</p>
+    <p id="gen" class="gen">1</p>
+    <dl class="stats">
+      <div><dt>Alive</dt><dd id="alive">120/120</dd></div>
+      <div><dt>Best lap</dt><dd id="lap">—</dd></div>
+      <div><dt>Leader laps</dt><dd id="laps">0</dd></div>
+      <div id="you-stat" hidden><dt>You</dt><dd id="you">—</dd></div>
+    </dl>
+  </header>
+
+  <nav class="controls" aria-label="Controls">
+    <div class="seg" role="group" aria-label="Speed">
+      <button data-speed="1">1×</button>
+      <button data-speed="5">5×</button>
+      <button data-speed="25">25×</button>
+    </div>
+    <button id="new">New track</button>
+    <button id="draw">Draw</button>
+    <button id="drive">Drive</button>
+    <button id="reset">Restart</button>
+  </nav>
+
+  <aside class="panel brain-panel">
+    <p class="panel-label">Leader's brain</p>
+    <canvas id="brain"></canvas>
+  </aside>
+  <aside class="panel chart-panel">
+    <p class="panel-label">Laps per generation</p>
+    <canvas id="chart"></canvas>
+  </aside>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
