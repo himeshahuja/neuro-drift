@@ -1,6 +1,6 @@
 # Neuro Drift
 
-120 cars, each driven by a neural network with 120 weights, learn to race by evolution. Nobody teaches them a racing line: the ones that get furthest breed, and in a few generations the lap times start to fall.
+120 cars, each driven by a neural network with 112 weights, learn to race by evolution. Nobody teaches them a racing line: the ones that get furthest breed, and in a few generations the lap times start to fall.
 
 Live: https://himeshahuja.github.io/neuro-drift/
 
